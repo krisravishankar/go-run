@@ -69,10 +69,6 @@ function createPNG(size) {
   const startX = Math.floor((size - totalW) / 2)
   const startY = Math.floor((size - totalH) / 2)
 
-  const cx = size / 2
-  const cy = size / 2
-  const r = size * 0.44
-
   // Raw image data: filter byte (0) + RGB per row
   const rowSize = 1 + size * 3
   const raw = Buffer.alloc(rowSize * size, 0)
@@ -80,17 +76,9 @@ function createPNG(size) {
   for (let y = 0; y < size; y++) {
     raw[y * rowSize] = 0 // filter byte = None
     for (let x = 0; x < size; x++) {
-      const dx = x + 0.5 - cx
-      const dy = y + 0.5 - cy
-      const inCircle = Math.sqrt(dx * dx + dy * dy) <= r
       const offset = y * rowSize + 1 + x * 3
 
-      if (!inCircle) {
-        // Black background outside circle (already 0)
-        continue
-      }
-
-      // Default: green fill
+      // Full green background — iOS applies its own rounded-rect mask
       raw[offset]     = 0x2e  // #2ECC71
       raw[offset + 1] = 0xcc
       raw[offset + 2] = 0x71

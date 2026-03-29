@@ -2,8 +2,7 @@ import { useState, useEffect, useRef } from 'react'
 import './App.css'
 import { useLocationTracker } from './useLocationTracker'
 
-
-type AppState = 'idle' | 'running' | 'finished'
+type AppState = 'idle' | 'countdown' | 'running' | 'finished'
 
 function formatTime(seconds: number): string {
   const h = Math.floor(seconds / 3600)
@@ -51,6 +50,7 @@ function SummaryRow({ label, value }: { label: string; value: string }) {
 
 export default function App() {
   const [appState, setAppState] = useState<AppState>('idle')
+  const [countdown, setCountdown] = useState(5)
   const [elapsed, setElapsed] = useState(0)
   const [finalDistance, setFinalDistance] = useState(0)
   const [finalTime, setFinalTime] = useState(0)
@@ -76,15 +76,8 @@ export default function App() {
   }
 
   function handleGo() {
-    setElapsed(0)
-    startTimeRef.current = Date.now()
-    startTracking()
-    timerRef.current = setInterval(
-      () => setElapsed(Math.floor((Date.now() - startTimeRef.current) / 1000)),
-      1000,
-    )
-    acquireWakeLock()
-    setAppState('running')
+    setCountdown(5)
+    setAppState('countdown')
   }
 
   function handleFinish() {
@@ -132,6 +125,30 @@ export default function App() {
     return () => document.removeEventListener('visibilitychange', handleVisibilityChange)
   }, [appState])
 
+  // Countdown tick — starts GPS + run when it reaches 0
+  useEffect(() => {
+    if (appState !== 'countdown') return
+    const id = setInterval(() => {
+      setCountdown(c => {
+        if (c <= 1) {
+          clearInterval(id)
+          setElapsed(0)
+          startTimeRef.current = Date.now()
+          startTracking()
+          timerRef.current = setInterval(
+            () => setElapsed(Math.floor((Date.now() - startTimeRef.current) / 1000)),
+            1000,
+          )
+          acquireWakeLock()
+          setAppState('running')
+          return 0
+        }
+        return c - 1
+      })
+    }, 1000)
+    return () => clearInterval(id)
+  }, [appState])
+
   const finalDistanceKm = finalDistance / 1000
 
   return (
@@ -153,6 +170,13 @@ export default function App() {
           <button className="circle-btn green" onClick={handleGo}>
             <span className="go-text">GO</span>
           </button>
+        </div>
+      )}
+
+      {appState === 'countdown' && (
+        <div className="screen">
+          <p className="countdown-label">GET READY</p>
+          <div className="countdown-number">{countdown}</div>
         </div>
       )}
 
