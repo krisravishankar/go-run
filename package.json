@@ -7,7 +7,7 @@
     "dev": "vite",
     "build": "node generate-icons.js && vite build",
     "preview": "vite preview --base /go-run/",
-    "deploy": "node generate-icons.js && vite build && gh-pages -d dist -t true"
+    "deploy": "node generate-icons.js && vite build && gh-pages -d dist --dotfiles"
   },
   "dependencies": {
     "react": "^18.3.1",
