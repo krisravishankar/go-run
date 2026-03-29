@@ -3,22 +3,22 @@ import './App.css'
 import { useLocationTracker } from './useLocationTracker'
 
 function ShoeIcon() {
+  // Phosphor "sneaker" icon — https://phosphoricons.com (MIT)
+  // Rendered twice with clipPaths: orange upper, silver sole
+  const d =
+    'M228.65,129.11l-60.73-20.24a24,24,0,0,1-14.32-13L130.39,41.6s0-.07,0-.1A16,16,0,0,0,110.25,33L34.53,60.49A16.05,16.05,0,0,0,24,75.53V192a16,16,0,0,0,16,16H240a16,16,0,0,0,16-16V167.06A40,40,0,0,0,228.65,129.11ZM115.72,48l7.11,16.63-21.56,7.85A8,8,0,0,0,104,88a7.91,7.91,0,0,0,2.73-.49l22.4-8.14,4.74,11.07-16.6,6A8,8,0,0,0,120,112a7.91,7.91,0,0,0,2.73-.49l17.6-6.4a40.24,40.24,0,0,0,7.68,10l-14.74,5.36A8,8,0,0,0,136,136a8.14,8.14,0,0,0,2.73-.48l28-10.18,56.87,18.95A24,24,0,0,1,238.93,160H40V75.53ZM40,192h0V176H240v16Z'
   return (
-    <svg width="80" height="56" viewBox="0 0 80 56" fill="none" xmlns="http://www.w3.org/2000/svg">
-      {/* Sole */}
-      <path d="M7 40 Q5 48 16 48 L62 48 Q72 48 71 40 L71 37 L7 37 Z" fill="#C8C8D4" />
-      {/* Midsole */}
-      <path d="M7 37 L71 37 L71 40 L7 40 Z" fill="#A8A8BC" />
-      {/* Upper body */}
-      <path d="M7 40 L7 21 Q7 8 20 7 L42 7 L54 5 Q68 3 71 19 L71 37 L7 37 Z" fill="#FF6A1A" />
-      {/* Toe shadow */}
-      <path d="M7 21 Q7 8 20 7 L28 7 Q17 11 15 21 Z" fill="#D4520D" />
-      {/* Heel collar */}
-      <path d="M54 5 Q68 3 71 15 L71 19" stroke="#D4520D" strokeWidth="2.5" fill="none" strokeLinecap="round" />
-      {/* Swoosh stripe */}
-      <path d="M25 30 Q44 19 67 25" stroke="rgba(255,255,255,0.78)" strokeWidth="4" strokeLinecap="round" fill="none" />
-      {/* Silver lace area */}
-      <path d="M36 7 L36 18 Q36 20 38 20 L50 20 Q52 20 52 18 L54 5 Z" fill="#C8C8D4" opacity="0.85" />
+    <svg width="80" height="56" viewBox="0 0 256 256" fill="none">
+      <defs>
+        <clipPath id="shoe-upper">
+          <rect x="0" y="0" width="256" height="176" />
+        </clipPath>
+        <clipPath id="shoe-sole">
+          <rect x="0" y="176" width="256" height="80" />
+        </clipPath>
+      </defs>
+      <path d={d} fill="#FF6A1A" clipPath="url(#shoe-upper)" />
+      <path d={d} fill="#C0C8D4" clipPath="url(#shoe-sole)" />
     </svg>
   )
 }
