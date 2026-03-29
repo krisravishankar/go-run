@@ -6,19 +6,19 @@ function ShoeIcon() {
   return (
     <svg width="80" height="56" viewBox="0 0 80 56" fill="none">
       {/* Sole */}
-      <path d="M7 40 Q5 48 16 48 L62 48 Q72 48 71 40 L71 37 L7 37 Z" fill="#C8C8D4" />
+      <path d="M7 40 Q5 48 16 48 L62 48 Q72 48 71 40 L71 37 L7 37 Z" fill="#8890A0" />
       {/* Midsole */}
-      <path d="M7 37 L71 37 L71 40 L7 40 Z" fill="#A8A8BC" />
+      <path d="M7 37 L71 37 L71 40 L7 40 Z" fill="#707888" />
       {/* Upper body */}
-      <path d="M7 40 L7 21 Q7 8 20 7 L42 7 L54 5 Q68 3 71 19 L71 37 L7 37 Z" fill="#FF6A1A" />
+      <path d="M7 40 L7 21 Q7 8 20 7 L42 7 L54 5 Q68 3 71 19 L71 37 L7 37 Z" fill="#C0C8D4" />
       {/* Toe shadow */}
-      <path d="M7 21 Q7 8 20 7 L28 7 Q17 11 15 21 Z" fill="#D4520D" />
+      <path d="M7 21 Q7 8 20 7 L28 7 Q17 11 15 21 Z" fill="#A0A8B8" />
       {/* Heel collar */}
-      <path d="M54 5 Q68 3 71 15 L71 19" stroke="#D4520D" strokeWidth="2.5" fill="none" strokeLinecap="round" />
+      <path d="M54 5 Q68 3 71 15 L71 19" stroke="#A0A8B8" strokeWidth="2.5" fill="none" strokeLinecap="round" />
       {/* Swoosh stripe */}
-      <path d="M25 30 Q44 19 67 25" stroke="rgba(255,255,255,0.78)" strokeWidth="4" strokeLinecap="round" fill="none" />
-      {/* Silver lace area */}
-      <path d="M36 7 L36 18 Q36 20 38 20 L50 20 Q52 20 52 18 L54 5 Z" fill="#C8C8D4" opacity="0.85" />
+      <path d="M25 30 Q44 19 67 25" stroke="rgba(255,255,255,0.6)" strokeWidth="4" strokeLinecap="round" fill="none" />
+      {/* Lace area */}
+      <path d="M36 7 L36 18 Q36 20 38 20 L50 20 Q52 20 52 18 L54 5 Z" fill="#D8DFE8" opacity="0.85" />
     </svg>
   )
 }
