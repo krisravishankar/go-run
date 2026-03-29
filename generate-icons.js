@@ -61,7 +61,7 @@ function chunk(type, data) {
 
 function createPNG(size) {
   // Scale factor: each bitmap pixel becomes `scale` screen pixels
-  const scale = Math.floor(size * 0.20)   // ~20% of icon size per glyph cell
+  const scale = Math.floor(size * 0.055)  // each glyph cell; "GO" spans ~55% of icon width
   const gap = Math.floor(size * 0.04)     // gap between G and O
 
   const totalW = GLYPH_W * scale * 2 + gap
