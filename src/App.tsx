@@ -97,7 +97,8 @@ export default function App() {
     <div className="app">
       {appState === 'idle' && (
         <div className="screen">
-          <h1 className="title">GoRun</h1>
+          <h1 className="title">Go Run</h1>
+          <div className="shoe-icon">👟</div>
           {permissionDenied && (
             <p className="permission-warning">
               Location denied. Enable in Settings → Privacy → Location Services.

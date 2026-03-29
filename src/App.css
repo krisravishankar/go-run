@@ -24,8 +24,15 @@
 .title {
   font-size: 52px;
   font-weight: 900;
+  font-style: italic;
   color: #fff;
   letter-spacing: -1px;
+}
+
+.shoe-icon {
+  font-size: 52px;
+  line-height: 1;
+  margin: -8px 0;
 }
 
 .complete-title {
@@ -79,10 +86,12 @@
 }
 
 .finish-text {
-  font-size: 26px;
-  font-weight: 700;
+  font-size: 34px;
+  font-weight: 900;
+  font-style: italic;
   color: #fff;
-  letter-spacing: 2px;
+  line-height: 1;
+  letter-spacing: -0.5px;
 }
 
 /* ── Running stats grid ──────────────────────────── */

@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 // Generates PWA icons in public/icons/ using pure Node.js (no dependencies).
-// Creates a green circle (#2ECC71) on a black background.
+// Green circle background with white "GO" text (pixel bitmap font).
 
 import { deflateSync } from 'zlib'
 import { writeFileSync, mkdirSync } from 'fs'
@@ -8,6 +8,33 @@ import { join, dirname } from 'path'
 import { fileURLToPath } from 'url'
 
 const __dirname = dirname(fileURLToPath(import.meta.url))
+
+// ── 5×7 pixel bitmaps for G and O ──────────────────────────────────────────
+//   Each row is a bitmask of 5 bits (MSB = leftmost pixel)
+
+const GLYPHS = {
+  G: [
+    0b01110,
+    0b10001,
+    0b10000,
+    0b10111,
+    0b10001,
+    0b10001,
+    0b01110,
+  ],
+  O: [
+    0b01110,
+    0b10001,
+    0b10001,
+    0b10001,
+    0b10001,
+    0b10001,
+    0b01110,
+  ],
+}
+
+const GLYPH_W = 5
+const GLYPH_H = 7
 
 function crc32(buf) {
   const table = new Uint32Array(256)
@@ -33,27 +60,70 @@ function chunk(type, data) {
 }
 
 function createPNG(size) {
-  // Raw image data: one filter byte (0 = None) + RGB pixels per row
-  const rowSize = 1 + size * 3
-  const raw = Buffer.alloc(rowSize * size, 0)
+  // Scale factor: each bitmap pixel becomes `scale` screen pixels
+  const scale = Math.floor(size * 0.20)   // ~20% of icon size per glyph cell
+  const gap = Math.floor(size * 0.04)     // gap between G and O
+
+  const totalW = GLYPH_W * scale * 2 + gap
+  const totalH = GLYPH_H * scale
+  const startX = Math.floor((size - totalW) / 2)
+  const startY = Math.floor((size - totalH) / 2)
 
   const cx = size / 2
   const cy = size / 2
   const r = size * 0.44
 
+  // Raw image data: filter byte (0) + RGB per row
+  const rowSize = 1 + size * 3
+  const raw = Buffer.alloc(rowSize * size, 0)
+
   for (let y = 0; y < size; y++) {
-    raw[y * rowSize] = 0 // filter byte
+    raw[y * rowSize] = 0 // filter byte = None
     for (let x = 0; x < size; x++) {
       const dx = x + 0.5 - cx
       const dy = y + 0.5 - cy
+      const inCircle = Math.sqrt(dx * dx + dy * dy) <= r
       const offset = y * rowSize + 1 + x * 3
-      if (Math.sqrt(dx * dx + dy * dy) <= r) {
-        // #2ECC71
-        raw[offset] = 0x2e
-        raw[offset + 1] = 0xcc
-        raw[offset + 2] = 0x71
+
+      if (!inCircle) {
+        // Black background outside circle (already 0)
+        continue
       }
-      // else stays black (0,0,0)
+
+      // Default: green fill
+      raw[offset]     = 0x2e  // #2ECC71
+      raw[offset + 1] = 0xcc
+      raw[offset + 2] = 0x71
+
+      // Check if this pixel falls inside a glyph
+      const lx = x - startX
+      const ly = y - startY
+
+      if (lx >= 0 && ly >= 0 && ly < totalH) {
+        // G glyph occupies columns [0, GLYPH_W*scale)
+        const gOffset = GLYPH_W * scale + gap
+        let glyphPixel = false
+
+        if (lx < GLYPH_W * scale) {
+          // Inside G
+          const col = Math.floor(lx / scale)
+          const row = Math.floor(ly / scale)
+          if (row < GLYPH_H && (GLYPHS.G[row] >> (GLYPH_W - 1 - col)) & 1)
+            glyphPixel = true
+        } else if (lx >= gOffset && lx < gOffset + GLYPH_W * scale) {
+          // Inside O
+          const col = Math.floor((lx - gOffset) / scale)
+          const row = Math.floor(ly / scale)
+          if (row < GLYPH_H && (GLYPHS.O[row] >> (GLYPH_W - 1 - col)) & 1)
+            glyphPixel = true
+        }
+
+        if (glyphPixel) {
+          raw[offset]     = 0xff  // white
+          raw[offset + 1] = 0xff
+          raw[offset + 2] = 0xff
+        }
+      }
     }
   }
 
@@ -64,7 +134,6 @@ function createPNG(size) {
   ihdr.writeUInt32BE(size, 4)
   ihdr[8] = 8 // bit depth
   ihdr[9] = 2 // color type: RGB
-  // bytes 10-12 already 0 (compression, filter, interlace)
 
   return Buffer.concat([
     Buffer.from([137, 80, 78, 71, 13, 10, 26, 10]), // PNG signature
