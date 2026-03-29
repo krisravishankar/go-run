@@ -75,16 +75,35 @@ export default function App() {
   const [finalDistance, setFinalDistance] = useState(0)
   const [finalTime, setFinalTime] = useState(0)
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null)
+  const startTimeRef = useRef<number>(0)
+  const wakeLockRef = useRef<WakeLockSentinel | null>(null)
 
   const { totalDistance, startTracking, stopTracking, permissionDenied } =
     useLocationTracker()
 
   const distanceKm = totalDistance / 1000
 
+  async function acquireWakeLock() {
+    if (!('wakeLock' in navigator)) return
+    try {
+      wakeLockRef.current = await navigator.wakeLock.request('screen')
+      wakeLockRef.current.addEventListener('release', () => {
+        wakeLockRef.current = null
+      })
+    } catch {
+      // Silently ignore — page may be hidden at request time
+    }
+  }
+
   function handleGo() {
     setElapsed(0)
+    startTimeRef.current = Date.now()
     startTracking()
-    timerRef.current = setInterval(() => setElapsed((e) => e + 1), 1000)
+    timerRef.current = setInterval(
+      () => setElapsed(Math.floor((Date.now() - startTimeRef.current) / 1000)),
+      1000,
+    )
+    acquireWakeLock()
     setAppState('running')
   }
 
@@ -93,6 +112,8 @@ export default function App() {
       clearInterval(timerRef.current)
       timerRef.current = null
     }
+    wakeLockRef.current?.release()
+    wakeLockRef.current = null
     setFinalDistance(totalDistance)
     setFinalTime(elapsed)
     stopTracking()
@@ -100,17 +121,36 @@ export default function App() {
   }
 
   function handleClear() {
+    wakeLockRef.current?.release()
+    wakeLockRef.current = null
     setElapsed(0)
     setFinalDistance(0)
     setFinalTime(0)
     setAppState('idle')
   }
 
+  // Release wake lock on unmount
   useEffect(() => {
     return () => {
       if (timerRef.current) clearInterval(timerRef.current)
+      wakeLockRef.current?.release()
     }
   }, [])
+
+  // Re-acquire wake lock when returning to app mid-run (iOS releases it on screen-off)
+  useEffect(() => {
+    function handleVisibilityChange() {
+      if (
+        document.visibilityState === 'visible' &&
+        appState === 'running' &&
+        wakeLockRef.current === null
+      ) {
+        acquireWakeLock()
+      }
+    }
+    document.addEventListener('visibilitychange', handleVisibilityChange)
+    return () => document.removeEventListener('visibilitychange', handleVisibilityChange)
+  }, [appState])
 
   const finalDistanceKm = finalDistance / 1000
 
@@ -123,6 +163,11 @@ export default function App() {
           {permissionDenied && (
             <p className="permission-warning">
               Location denied. Enable in Settings → Privacy → Location Services.
+            </p>
+          )}
+          {'wakeLock' in navigator ? null : (
+            <p className="permission-warning">
+              Keep the screen on during your run to track GPS distance.
             </p>
           )}
           <button className="circle-btn green" onClick={handleGo}>
