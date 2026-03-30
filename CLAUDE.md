@@ -46,6 +46,10 @@ npm run deploy     # build + push to gh-pages branch
 2. Open `https://krisravishankar.github.io/go-run/` in Safari
 3. Share → Add to Home Screen
 
+## Git Workflow
+
+- Always commit and push directly to `main`. Do not create feature branches.
+
 ## Design Notes
 
 - All button text (GO, FINISH) uses Nunito weight 900 italic
