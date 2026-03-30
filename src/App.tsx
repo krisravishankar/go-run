@@ -207,7 +207,7 @@ export default function App() {
             <div className="secondary-divider" />
             <div className="secondary-stat">
               <span className="secondary-value">{formatPace(finalTime, finalDistanceKm)} /km</span>
-              <span className="secondary-label">AVG PACE</span>
+              <span className="secondary-label">PACE</span>
             </div>
           </div>
           <button className="clear-btn" onClick={handleClear}>
