@@ -10,8 +10,8 @@ export default defineConfig({
       registerType: 'autoUpdate',
       includeAssets: ['icons/icon-192.png', 'icons/icon-512.png'],
       manifest: {
-        name: 'GoRun',
-        short_name: 'GoRun',
+        name: 'Go Run',
+        short_name: 'Go Run',
         description: 'Track your runs — distance, time, pace',
         theme_color: '#000000',
         background_color: '#000000',
