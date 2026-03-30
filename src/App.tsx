@@ -21,6 +21,13 @@ function formatPace(seconds: number, distanceKm: number): string {
   return `${m}'${String(s).padStart(2, '0')}"`
 }
 
+function formatPaceSeconds(ps: number | null): string {
+  if (ps === null) return "--'--\""
+  const m = Math.floor(ps / 60)
+  const s = Math.round(ps % 60)
+  return `${m}'${String(s).padStart(2, '0')}"`
+}
+
 interface StatProps {
   value: string
   unit?: string
@@ -49,7 +56,7 @@ export default function App() {
   const startTimeRef = useRef<number>(0)
   const wakeLockRef = useRef<WakeLockSentinel | null>(null)
 
-  const { totalDistance, startTracking, stopTracking, permissionDenied } =
+  const { totalDistance, rollingPaceSeconds, startTracking, stopTracking, permissionDenied } =
     useLocationTracker()
 
   const distanceKm = totalDistance / 1000
@@ -181,7 +188,7 @@ export default function App() {
             />
             <Stat value={formatTime(elapsed)} label="TIME" />
             <Stat
-              value={formatPace(elapsed, distanceKm)}
+              value={formatPaceSeconds(rollingPaceSeconds)}
               unit="/km"
               label="PACE"
             />
