@@ -39,15 +39,6 @@ function Stat({ value, unit, label }: StatProps) {
   )
 }
 
-function SummaryRow({ label, value }: { label: string; value: string }) {
-  return (
-    <div className="summary-row">
-      <span className="summary-label">{label}</span>
-      <span className="summary-value">{value}</span>
-    </div>
-  )
-}
-
 export default function App() {
   const [appState, setAppState] = useState<AppState>('idle')
   const [countdown, setCountdown] = useState(5)
@@ -202,19 +193,22 @@ export default function App() {
       )}
 
       {appState === 'finished' && (
-        <div className="screen">
-          <h2 className="complete-title">Run Complete</h2>
-          <div className="divider" />
-          <div className="summary">
-            <SummaryRow
-              label="Distance"
-              value={`${finalDistanceKm.toFixed(2)} km`}
-            />
-            <SummaryRow label="Time" value={formatTime(finalTime)} />
-            <SummaryRow
-              label="Avg Pace"
-              value={`${formatPace(finalTime, finalDistanceKm)} /km`}
-            />
+        <div className="screen finished-screen">
+          <h2 className="complete-title">RUN COMPLETE</h2>
+          <div className="hero-stat">
+            <span className="hero-value">{finalDistanceKm.toFixed(2)}</span>
+            <span className="hero-unit">km</span>
+          </div>
+          <div className="secondary-stats">
+            <div className="secondary-stat">
+              <span className="secondary-value">{formatTime(finalTime)}</span>
+              <span className="secondary-label">TIME</span>
+            </div>
+            <div className="secondary-divider" />
+            <div className="secondary-stat">
+              <span className="secondary-value">{formatPace(finalTime, finalDistanceKm)} /km</span>
+              <span className="secondary-label">AVG PACE</span>
+            </div>
           </div>
           <button className="clear-btn" onClick={handleClear}>
             CLEAR

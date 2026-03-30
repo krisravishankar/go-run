@@ -59,8 +59,78 @@
 .complete-title {
   font-size: 38px;
   font-weight: 800;
+  font-style: italic;
   color: #fff;
   letter-spacing: -0.5px;
+  text-transform: uppercase;
+}
+
+.finished-screen {
+  gap: 28px;
+}
+
+.hero-stat {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+}
+
+.hero-value {
+  font-size: 96px;
+  font-weight: 900;
+  font-style: italic;
+  color: #2ECC71;
+  line-height: 1;
+  letter-spacing: -3px;
+  font-variant-numeric: tabular-nums;
+}
+
+.hero-unit {
+  font-size: 28px;
+  font-weight: 700;
+  color: rgba(46, 204, 113, 0.55);
+  letter-spacing: 1px;
+}
+
+.secondary-stats {
+  display: flex;
+  align-items: center;
+  gap: 28px;
+  width: 100%;
+  justify-content: center;
+  padding: 20px 0;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.secondary-stat {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  min-width: 100px;
+}
+
+.secondary-value {
+  font-size: 24px;
+  font-weight: 800;
+  color: #fff;
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+}
+
+.secondary-label {
+  font-size: 11px;
+  font-weight: 700;
+  color: rgba(255, 255, 255, 0.35);
+  letter-spacing: 2.5px;
+  text-transform: uppercase;
+}
+
+.secondary-divider {
+  width: 1px;
+  height: 36px;
+  background: rgba(255, 255, 255, 0.1);
 }
 
 /* ── Circle buttons ──────────────────────────────── */
@@ -163,44 +233,6 @@
 
 /* ── Finished summary ────────────────────────────── */
 
-.divider {
-  width: 100%;
-  height: 1px;
-  background: rgba(255, 255, 255, 0.1);
-  margin: -20px 0;
-}
-
-.summary {
-  display: flex;
-  flex-direction: column;
-  gap: 0;
-  width: 100%;
-  padding: 0 8px;
-}
-
-.summary-row {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 16px 0;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.07);
-}
-
-.summary-row:last-child {
-  border-bottom: none;
-}
-
-.summary-label {
-  font-size: 17px;
-  font-weight: 500;
-  color: rgba(255, 255, 255, 0.45);
-}
-
-.summary-value {
-  font-size: 17px;
-  font-weight: 800;
-  color: #fff;
-}
 
 /* ── Clear button ────────────────────────────────── */
 
