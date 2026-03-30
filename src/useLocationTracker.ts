@@ -1,7 +1,7 @@
 import { useState, useRef, useCallback } from 'react'
 
 const WINDOW_MS = 30_000        // 30-second rolling window
-const MIN_WINDOW_METRES = 100   // minimum distance to show a pace
+const MIN_WINDOW_METRES = 30    // minimum distance to show a pace
 const PACE_THROTTLE_MS = 5_000  // update at most every 5s
 
 function haversineMetres(
