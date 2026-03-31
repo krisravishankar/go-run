@@ -1,4 +1,4 @@
-import { useState, useRef, useCallback } from 'react'
+import { useState, useRef, useCallback, useEffect } from 'react'
 
 const WINDOW_MS = 30_000        // 30-second rolling window
 const MIN_WINDOW_METRES = 30    // minimum distance to show a pace
@@ -31,16 +31,17 @@ export function useLocationTracker() {
   const lastPosRef = useRef<{ lat: number; lon: number } | null>(null)
   const positionBufferRef = useRef<TimestampedPosition[]>([])
   const lastPaceUpdateRef = useRef<number>(0)
+  const trackingActiveRef = useRef(false)
 
-  const startTracking = useCallback(() => {
-    setTotalDistance(0)
-    setPermissionDenied(false)
-    setRollingPaceSeconds(null)
-    lastPosRef.current = null
-    positionBufferRef.current = []
-    lastPaceUpdateRef.current = 0
-
+  // Start (or restart) the geolocation watcher without resetting accumulated state
+  const startWatcher = useCallback(() => {
     if (!navigator.geolocation) return
+
+    // Clear any existing watcher first
+    if (watchIdRef.current !== null) {
+      navigator.geolocation.clearWatch(watchIdRef.current)
+      watchIdRef.current = null
+    }
 
     watchIdRef.current = navigator.geolocation.watchPosition(
       (pos) => {
@@ -95,13 +96,45 @@ export function useLocationTracker() {
     )
   }, [])
 
+  const startTracking = useCallback(() => {
+    setTotalDistance(0)
+    setPermissionDenied(false)
+    setRollingPaceSeconds(null)
+    lastPosRef.current = null
+    positionBufferRef.current = []
+    lastPaceUpdateRef.current = 0
+    trackingActiveRef.current = true
+
+    startWatcher()
+  }, [startWatcher])
+
   const stopTracking = useCallback(() => {
+    trackingActiveRef.current = false
     if (watchIdRef.current !== null) {
       navigator.geolocation.clearWatch(watchIdRef.current)
       watchIdRef.current = null
     }
     lastPosRef.current = null
   }, [])
+
+  // Restart the geolocation watcher when the page becomes visible again.
+  // On iOS/Android, locking the phone suspends watchPosition callbacks.
+  // Re-creating the watcher on resume ensures GPS updates continue,
+  // while lastPosRef is preserved so the distance gap is captured.
+  useEffect(() => {
+    function handleVisibilityChange() {
+      if (document.visibilityState === 'visible' && trackingActiveRef.current) {
+        // Clear stale pace data — the gap makes rolling pace meaningless
+        positionBufferRef.current = []
+        lastPaceUpdateRef.current = 0
+        setRollingPaceSeconds(null)
+
+        startWatcher()
+      }
+    }
+    document.addEventListener('visibilitychange', handleVisibilityChange)
+    return () => document.removeEventListener('visibilitychange', handleVisibilityChange)
+  }, [startWatcher])
 
   return { totalDistance, rollingPaceSeconds, startTracking, stopTracking, permissionDenied }
 }
