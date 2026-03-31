@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from 'react'
 import './App.css'
 import { useLocationTracker } from './useLocationTracker'
+import { useSilentAudio } from './useSilentAudio'
 
 type AppState = 'idle' | 'countdown' | 'running' | 'finished'
 
@@ -56,10 +57,9 @@ export default function App() {
   const startTimeRef = useRef<number>(0)
   const wakeLockRef = useRef<WakeLockSentinel | null>(null)
 
-  const [gpsLostWarning, setGpsLostWarning] = useState(false)
-
   const { totalDistance, rollingPaceSeconds, startTracking, stopTracking, permissionDenied } =
     useLocationTracker()
+  const silentAudio = useSilentAudio()
 
   const distanceKm = totalDistance / 1000
 
@@ -77,7 +77,6 @@ export default function App() {
 
   function handleGo() {
     setCountdown(5)
-    setGpsLostWarning(false)
     setAppState('countdown')
   }
 
@@ -88,6 +87,7 @@ export default function App() {
     }
     wakeLockRef.current?.release()
     wakeLockRef.current = null
+    silentAudio.stop()
     setFinalDistance(totalDistance)
     setFinalTime(elapsed)
     stopTracking()
@@ -97,29 +97,31 @@ export default function App() {
   function handleClear() {
     wakeLockRef.current?.release()
     wakeLockRef.current = null
+    silentAudio.stop()
     setElapsed(0)
     setFinalDistance(0)
     setFinalTime(0)
     setAppState('idle')
   }
 
-  // Release wake lock on unmount
+  // Clean up on unmount
   useEffect(() => {
     return () => {
       if (timerRef.current) clearInterval(timerRef.current)
       wakeLockRef.current?.release()
+      silentAudio.stop()
     }
   }, [])
 
   // Re-acquire wake lock when returning to app mid-run (iOS releases it on screen-off)
-  // and warn the user that distance tracking was interrupted
   useEffect(() => {
     function handleVisibilityChange() {
-      if (document.visibilityState === 'visible' && appState === 'running') {
-        if (wakeLockRef.current === null) {
-          acquireWakeLock()
-        }
-        setGpsLostWarning(true)
+      if (
+        document.visibilityState === 'visible' &&
+        appState === 'running' &&
+        wakeLockRef.current === null
+      ) {
+        acquireWakeLock()
       }
     }
     document.addEventListener('visibilitychange', handleVisibilityChange)
@@ -136,6 +138,7 @@ export default function App() {
           setElapsed(0)
           startTimeRef.current = Date.now()
           startTracking()
+          silentAudio.start()
           timerRef.current = setInterval(
             () => setElapsed(Math.floor((Date.now() - startTimeRef.current) / 1000)),
             1000,
@@ -161,11 +164,6 @@ export default function App() {
           {permissionDenied && (
             <p className="permission-warning">
               Location denied. Enable in Settings → Privacy → Location Services.
-            </p>
-          )}
-          {'wakeLock' in navigator ? null : (
-            <p className="permission-warning">
-              Keep the screen on during your run to track GPS distance.
             </p>
           )}
           <button className="circle-btn green" onClick={handleGo}>
@@ -196,12 +194,6 @@ export default function App() {
               label="PACE"
             />
           </div>
-          {gpsLostWarning && (
-            <p className="permission-warning">
-              Distance tracking was paused while the screen was off. Some distance may be missing.
-            </p>
-          )}
-          <p className="screen-on-hint">Keep your screen on — locking your phone stops GPS tracking</p>
           <button className="circle-btn grey" onClick={handleFinish}>
             <span className="finish-text">FINISH</span>
           </button>
