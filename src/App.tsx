@@ -56,6 +56,8 @@ export default function App() {
   const startTimeRef = useRef<number>(0)
   const wakeLockRef = useRef<WakeLockSentinel | null>(null)
 
+  const [gpsLostWarning, setGpsLostWarning] = useState(false)
+
   const { totalDistance, rollingPaceSeconds, startTracking, stopTracking, permissionDenied } =
     useLocationTracker()
 
@@ -75,6 +77,7 @@ export default function App() {
 
   function handleGo() {
     setCountdown(5)
+    setGpsLostWarning(false)
     setAppState('countdown')
   }
 
@@ -109,14 +112,14 @@ export default function App() {
   }, [])
 
   // Re-acquire wake lock when returning to app mid-run (iOS releases it on screen-off)
+  // and warn the user that distance tracking was interrupted
   useEffect(() => {
     function handleVisibilityChange() {
-      if (
-        document.visibilityState === 'visible' &&
-        appState === 'running' &&
-        wakeLockRef.current === null
-      ) {
-        acquireWakeLock()
+      if (document.visibilityState === 'visible' && appState === 'running') {
+        if (wakeLockRef.current === null) {
+          acquireWakeLock()
+        }
+        setGpsLostWarning(true)
       }
     }
     document.addEventListener('visibilitychange', handleVisibilityChange)
@@ -193,6 +196,12 @@ export default function App() {
               label="PACE"
             />
           </div>
+          {gpsLostWarning && (
+            <p className="permission-warning">
+              Distance tracking was paused while the screen was off. Some distance may be missing.
+            </p>
+          )}
+          <p className="screen-on-hint">Keep your screen on — locking your phone stops GPS tracking</p>
           <button className="circle-btn grey" onClick={handleFinish}>
             <span className="finish-text">FINISH</span>
           </button>
